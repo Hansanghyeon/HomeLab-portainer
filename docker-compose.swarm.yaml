@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  agent:
+    image: portainer/agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      mode: global
+  app:
+    image: portainer/portainer-ce
+    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    restart: always
+    volumes:
+      - ./data:/data
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == ${HOSTNAME}
+      labels:
+        - traefik.enable=true
+        ## HTTP Routers
+        - traefik.http.routers.202102__portainer.entrypoints=websecure
+        - traefik.http.routers.202102__portainer.rule=Host(`portainer.nas.hyeon.pro`)
+        - traefik.http.routers.202102__portainer.tls.certresolver=leresolver
+        - traefik.http.services.202102__portainer.loadbalancer.server.port=9000
+        
+########################### NETWORKS
+networks:
+  default:
+    external: 
+      name: proxy-main
