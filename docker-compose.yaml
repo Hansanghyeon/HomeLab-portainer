@@ -1,13 +1,11 @@
 version: '3.7'
 
-networks:
-  default:
-    external:
-      name: traefik_proxy
-
 services:
   portainer:
     container_name: DO__portainer
+    networks:
+      - traefik
+      - default
     image: portainer/portainer
     command: -H unix:///var/run/docker.sock
     restart: always
@@ -21,3 +19,9 @@ services:
       - traefik.http.routers.202102__portainer.rule=Host(`portainer.nas.hyeon.pro`)
       - traefik.http.routers.202102__portainer.tls.certresolver=leresolver
       - traefik.http.services.202102__portainer.loadbalancer.server.port=9000
+
+########################### NETWORKS
+networks:
+  traefik:
+    external:
+      name: traefik_proxy
